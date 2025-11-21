@@ -27,10 +27,29 @@ public class UIManager : MonoBehaviour
 
     private PlayerController playerController;
     private int coinsCollected = 0;
+    private GameManager gameManager;
+    private AudioManager audioManager;
 
     private void Awake()
     {
         playerController = FindObjectOfType<PlayerController>();
+    }
+
+    private void Start()
+    {
+        gameManager = GameManager.Instance;
+        audioManager = AudioManager.Instance;
+        ShowStartScreen();
+        SetupVolumeSliders();
+        LoadVolumeSettings();
+    }
+
+    private void SetupVolumeSliders()
+    {
+        if (musicVolumeSlider != null)
+            musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+        if (sfxVolumeSlider != null)
+            sfxVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
     }
 
     private void OnEnable()
@@ -41,26 +60,6 @@ public class UIManager : MonoBehaviour
         GameManager.OnGameOver += OnGameOver;
         GameManager.OnScoreChanged += OnScoreChanged;
         GameManager.OnTimeChanged += OnTimeChanged;
-    }
-
-    private void Start()
-    {
-        ShowStartScreen();
-        SetupVolumeSliders();
-        LoadVolumeSettings();
-    }
-
-    private void SetupVolumeSliders()
-    {
-        if (musicVolumeSlider != null)
-        {
-            musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
-        }
-
-        if (sfxVolumeSlider != null)
-        {
-            sfxVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
-        }
     }
 
     private void OnDisable()
@@ -111,26 +110,20 @@ public class UIManager : MonoBehaviour
         SetPanelActive(pausePanel, false);
         SetPanelActive(gameOverPanel, true);
 
-        if (GameManager.Instance != null)
-        {
+        if (gameManager != null)
             UpdateGameOverStats();
-        }
     }
 
     private void SetPanelActive(GameObject panel, bool active)
     {
         if (panel != null)
-        {
             panel.SetActive(active);
-        }
     }
 
     public void OnStartButtonClicked()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.StartGame();
-        }
+        if (gameManager != null)
+            gameManager.StartGame();
     }
 
     public void OnSettingsButtonClicked()
@@ -141,10 +134,8 @@ public class UIManager : MonoBehaviour
 
     public void OnExitButtonClicked()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.QuitGame();
-        }
+        if (gameManager != null)
+            gameManager.QuitGame();
     }
 
     public void OnSettingsBackButtonClicked()
@@ -155,18 +146,14 @@ public class UIManager : MonoBehaviour
 
     public void OnPauseButtonClicked()
     {
-        if (GameManager.Instance != null && GameManager.Instance.IsGameStarted && !GameManager.Instance.IsGamePaused)
-        {
-            GameManager.Instance.PauseGame();
-        }
+        if (gameManager != null && gameManager.IsGameStarted && !gameManager.IsGamePaused)
+            gameManager.PauseGame();
     }
 
     public void OnResumeButtonClicked()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.ResumeGame();
-        }
+        if (gameManager != null)
+            gameManager.ResumeGame();
     }
 
     public void OnPauseMenuButtonClicked()
@@ -176,10 +163,8 @@ public class UIManager : MonoBehaviour
 
     public void OnPauseQuitButtonClicked()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.QuitGame();
-        }
+        if (gameManager != null)
+            gameManager.QuitGame();
     }
 
     public void OnReturnToMenuButtonClicked()
@@ -190,34 +175,26 @@ public class UIManager : MonoBehaviour
 
     public void OnQuitGameButtonClicked()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.QuitGame();
-        }
+        if (gameManager != null)
+            gameManager.QuitGame();
     }
 
     public void OnJumpButtonClicked()
     {
         if (playerController != null)
-        {
             playerController.Jump();
-        }
     }
 
     public void OnMusicVolumeChanged(float value)
     {
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.SetMusicVolume(value);
-        }
+        if (audioManager != null)
+            audioManager.SetMusicVolume(value);
     }
 
     public void OnSFXVolumeChanged(float value)
     {
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.SetSFXVolume(value);
-        }
+        if (audioManager != null)
+            audioManager.SetSFXVolume(value);
     }
 
     private void OnGameStart()
@@ -266,19 +243,17 @@ public class UIManager : MonoBehaviour
     private void UpdateCoinText()
     {
         if (coinCollectedText != null)
-        {
             coinCollectedText.text = coinsCollected.ToString();
-        }
     }
 
     private void UpdateGameOverStats()
     {
-        if (GameManager.Instance == null)
+        if (gameManager == null)
             return;
 
         if (timeSurvivedText != null)
         {
-            float time = GameManager.Instance.TimeElapsed;
+            float time = gameManager.TimeElapsed;
             int minutes = Mathf.FloorToInt(time / 60f);
             int seconds = Mathf.FloorToInt(time % 60f);
             timeSurvivedText.text = minutes.ToString("00") + ":" + seconds.ToString("00");
@@ -286,24 +261,19 @@ public class UIManager : MonoBehaviour
 
         if (finalCoinsText != null)
         {
-            int finalCoins = GameManager.Instance.Score / 10;
+            int finalCoins = gameManager.Score / 10;
             finalCoinsText.text = finalCoins.ToString();
         }
     }
 
     private void LoadVolumeSettings()
     {
-        if (AudioManager.Instance != null)
+        if (audioManager != null)
         {
             if (musicVolumeSlider != null)
-            {
-                musicVolumeSlider.value = AudioManager.Instance.GetMusicVolume();
-            }
-
+                musicVolumeSlider.value = audioManager.GetMusicVolume();
             if (sfxVolumeSlider != null)
-            {
-                sfxVolumeSlider.value = AudioManager.Instance.GetSFXVolume();
-            }
+                sfxVolumeSlider.value = audioManager.GetSFXVolume();
         }
     }
 }

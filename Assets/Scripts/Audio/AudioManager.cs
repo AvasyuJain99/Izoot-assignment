@@ -25,6 +25,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] private float musicVolume = 1f;
     [SerializeField] [Range(0f, 1f)] private float sfxVolume = 1f;
 
+    private Dictionary<string, AudioClip> sfxClipDictionary;
+
     private void Awake()
     {
         if (Instance == null)
@@ -56,6 +58,23 @@ public class AudioManager : MonoBehaviour
         UpdateVolume();
     }
 
+    private void Start()
+    {
+        BuildSFXDictionary();
+        if (menuBGM != null && bgmSource != null)
+            PlayBGM(menuBGM);
+    }
+
+    private void BuildSFXDictionary()
+    {
+        sfxClipDictionary = new Dictionary<string, AudioClip>();
+        foreach (AudioClipData data in sfxClips)
+        {
+            if (data.clip != null && !string.IsNullOrEmpty(data.name))
+                sfxClipDictionary[data.name] = data.clip;
+        }
+    }
+
     private void OnEnable()
     {
         GameManager.OnGameStart += OnGameStart;
@@ -68,50 +87,30 @@ public class AudioManager : MonoBehaviour
         GameManager.OnGameOver -= OnGameOver;
     }
 
-    private void Start()
-    {
-        if (menuBGM != null && bgmSource != null)
-        {
-            PlayBGM(menuBGM);
-        }
-    }
-
     public void PlayBGM(AudioClip clip)
     {
         if (bgmSource == null || clip == null)
             return;
-
         bgmSource.clip = clip;
         bgmSource.Play();
     }
 
     public void PlaySFX(string clipName)
     {
-        AudioClip clip = GetSFXClip(clipName);
-        if (clip != null && sfxSource != null)
+        if (sfxSource == null || string.IsNullOrEmpty(clipName))
+            return;
+
+        if (sfxClipDictionary != null && sfxClipDictionary.TryGetValue(clipName, out AudioClip clip))
         {
-            sfxSource.PlayOneShot(clip);
+            if (clip != null)
+                sfxSource.PlayOneShot(clip);
         }
     }
 
     public void PlaySFX(AudioClip clip)
     {
         if (clip != null && sfxSource != null)
-        {
             sfxSource.PlayOneShot(clip);
-        }
-    }
-
-    private AudioClip GetSFXClip(string name)
-    {
-        foreach (AudioClipData data in sfxClips)
-        {
-            if (data.name == name)
-            {
-                return data.clip;
-            }
-        }
-        return null;
     }
 
     public void SetMusicVolume(float volume)
@@ -133,22 +132,15 @@ public class AudioManager : MonoBehaviour
     private void UpdateVolume()
     {
         if (bgmSource != null)
-        {
             bgmSource.volume = musicVolume;
-        }
-
         if (sfxSource != null)
-        {
             sfxSource.volume = sfxVolume;
-        }
     }
 
     private void OnGameStart()
     {
         if (gameBGM != null)
-        {
             PlayBGM(gameBGM);
-        }
     }
 
     private void OnGameOver()

@@ -12,6 +12,9 @@ public class LoopingGround : MonoBehaviour
     [SerializeField] private float rightBoundary = 64f;
 
     private float currentGameSpeed = 0f;
+    private GameManager gameManager;
+    private Vector3 ground1Pos;
+    private Vector3 ground2Pos;
 
     private void OnEnable()
     {
@@ -27,54 +30,47 @@ public class LoopingGround : MonoBehaviour
 
     private void Start()
     {
+        gameManager = GameManager.Instance;
         if (ground1 != null)
         {
-            ground1.position = new Vector3(0f, ground1.position.y, ground1.position.z);
+            ground1Pos = ground1.position;
+            ground1Pos.x = 0f;
+            ground1.position = ground1Pos;
         }
 
         if (ground2 != null)
         {
-            ground2.position = new Vector3(groundWidth, ground2.position.y, ground2.position.z);
+            ground2Pos = ground2.position;
+            ground2Pos.x = groundWidth;
+            ground2.position = ground2Pos;
         }
 
         currentGameSpeed = 0f;
-        
-        if (GameManager.Instance != null)
-        {
-            if (GameManager.Instance.IsGameStarted)
-            {
-                currentGameSpeed = GameManager.Instance.CurrentSpeed;
-            }
-        }
+        if (gameManager != null && gameManager.IsGameStarted)
+            currentGameSpeed = gameManager.CurrentSpeed;
     }
 
     private void Update()
     {
-        if (!GameManager.Instance || !GameManager.Instance.IsGameStarted || GameManager.Instance.IsGamePaused || GameManager.Instance.IsGameOver)
+        if (gameManager == null || !gameManager.IsGameStarted || gameManager.IsGamePaused || gameManager.IsGameOver)
             return;
 
         if (ground1 != null)
         {
-            ground1.position += Vector3.left * currentGameSpeed * Time.deltaTime;
-            
-            if (ground1.position.x <= leftBoundary)
-            {
-                Vector3 newPos = ground1.position;
-                newPos.x = rightBoundary;
-                ground1.position = newPos;
-            }
+            ground1Pos = ground1.position;
+            ground1Pos.x -= currentGameSpeed * Time.deltaTime;
+            if (ground1Pos.x <= leftBoundary)
+                ground1Pos.x = rightBoundary;
+            ground1.position = ground1Pos;
         }
 
         if (ground2 != null)
         {
-            ground2.position += Vector3.left * currentGameSpeed * Time.deltaTime;
-            
-            if (ground2.position.x <= leftBoundary)
-            {
-                Vector3 newPos = ground2.position;
-                newPos.x = rightBoundary;
-                ground2.position = newPos;
-            }
+            ground2Pos = ground2.position;
+            ground2Pos.x -= currentGameSpeed * Time.deltaTime;
+            if (ground2Pos.x <= leftBoundary)
+                ground2Pos.x = rightBoundary;
+            ground2.position = ground2Pos;
         }
     }
 
@@ -85,9 +81,7 @@ public class LoopingGround : MonoBehaviour
 
     private void OnGameStart()
     {
-        if (GameManager.Instance != null)
-        {
-            currentGameSpeed = GameManager.Instance.CurrentSpeed;
-        }
+        if (gameManager != null)
+            currentGameSpeed = gameManager.CurrentSpeed;
     }
 }

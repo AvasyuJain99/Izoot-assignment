@@ -8,14 +8,35 @@ public class MovingObject : MonoBehaviour
 
     private Transform playerTransform;
     private float currentSpeed = 0f;
+    private Transform cachedTransform;
+    private GameManager gameManager;
+    private ObjectPooler objectPooler;
+    private PowerUp cachedPowerUp;
+    private string cachedTag;
+    private string poolTag;
+    private bool tagChecked = false;
+
+    private void Awake()
+    {
+        cachedTransform = transform;
+        cachedTag = gameObject.tag;
+    }
+
+    private void Start()
+    {
+        gameManager = GameManager.Instance;
+        objectPooler = ObjectPooler.Instance;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            playerTransform = player.transform;
+    }
 
     private void OnEnable()
     {
         GameManager.OnSpeedChanged += UpdateSpeed;
-        if (GameManager.Instance != null)
-        {
-            currentSpeed = GameManager.Instance.CurrentSpeed;
-        }
+        if (gameManager != null)
+            currentSpeed = gameManager.CurrentSpeed;
+        tagChecked = false;
     }
 
     private void OnDisable()
@@ -23,26 +44,15 @@ public class MovingObject : MonoBehaviour
         GameManager.OnSpeedChanged -= UpdateSpeed;
     }
 
-    private void Start()
-    {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            playerTransform = player.transform;
-        }
-    }
-
     private void Update()
     {
-        if (!shouldMove || !GameManager.Instance || !GameManager.Instance.IsGameStarted || GameManager.Instance.IsGamePaused || GameManager.Instance.IsGameOver)
+        if (!shouldMove || gameManager == null || !gameManager.IsGameStarted || gameManager.IsGamePaused || gameManager.IsGameOver)
             return;
 
-        transform.position += Vector3.left * currentSpeed * Time.deltaTime;
+        cachedTransform.position += Vector3.left * currentSpeed * Time.deltaTime;
 
-        if (playerTransform != null && transform.position.x < playerTransform.position.x + despawnDistance)
-        {
+        if (playerTransform != null && cachedTransform.position.x < playerTransform.position.x + despawnDistance)
             Despawn();
-        }
     }
 
     private void UpdateSpeed(float newSpeed)
@@ -52,25 +62,27 @@ public class MovingObject : MonoBehaviour
 
     private void Despawn()
     {
-        if (ObjectPooler.Instance != null)
+        if (objectPooler != null)
         {
-            string poolTag = "";
-            if (gameObject.CompareTag("Obstacle"))
-                poolTag = "Obstacle";
-            else if (gameObject.CompareTag("Coin"))
-                poolTag = "Coin";
-            else if (gameObject.CompareTag("PowerUp"))
+            if (!tagChecked)
             {
-                PowerUp powerUp = GetComponent<PowerUp>();
-                if (powerUp != null)
+                if (cachedTag == "Obstacle")
+                    poolTag = "Obstacle";
+                else if (cachedTag == "Coin")
+                    poolTag = "Coin";
+                else if (cachedTag == "PowerUp")
                 {
-                    poolTag = powerUp.GetPowerUpType().ToString();
+                    if (cachedPowerUp == null)
+                        cachedPowerUp = GetComponent<PowerUp>();
+                    if (cachedPowerUp != null)
+                        poolTag = cachedPowerUp.GetPowerUpType().ToString();
                 }
+                tagChecked = true;
             }
 
             if (!string.IsNullOrEmpty(poolTag))
             {
-                ObjectPooler.Instance.ReturnToPool(gameObject, poolTag);
+                objectPooler.ReturnToPool(gameObject, poolTag);
                 return;
             }
         }

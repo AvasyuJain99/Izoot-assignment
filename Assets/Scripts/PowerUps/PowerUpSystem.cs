@@ -15,6 +15,7 @@ public class PowerUpSystem : MonoBehaviour
     private bool hasDoubleJump = false;
     private Coroutine shieldCoroutine;
     private Coroutine doubleJumpCoroutine;
+    private AudioManager audioManager;
 
     private void Awake()
     {
@@ -27,6 +28,11 @@ public class PowerUpSystem : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+    }
+
+    private void Start()
+    {
+        audioManager = AudioManager.Instance;
     }
 
     public void ActivatePowerUp(PowerUpType type, float duration)
@@ -44,29 +50,25 @@ public class PowerUpSystem : MonoBehaviour
 
     private void ActivateShield(float duration)
     {
-        AudioManager.Instance.PlaySFX("Shield");
+        if (audioManager != null)
+            audioManager.PlaySFX("Shield");
         if (hasShield && shieldCoroutine != null)
-        {
             StopCoroutine(shieldCoroutine);
-        }
 
         hasShield = true;
         OnShieldActivated?.Invoke();
-
         shieldCoroutine = StartCoroutine(ShieldCoroutine(duration));
     }
 
     private void ActivateDoubleJump(float duration)
     {
-        AudioManager.Instance.PlaySFX("DoubleJump");
+        if (audioManager != null)
+            audioManager.PlaySFX("DoubleJump");
         if (hasDoubleJump && doubleJumpCoroutine != null)
-        {
             StopCoroutine(doubleJumpCoroutine);
-        }
 
         hasDoubleJump = true;
         OnDoubleJumpActivated?.Invoke();
-
         doubleJumpCoroutine = StartCoroutine(DoubleJumpCoroutine(duration));
     }
 

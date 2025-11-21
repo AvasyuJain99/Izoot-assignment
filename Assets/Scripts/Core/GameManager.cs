@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
     public bool IsGameOver => isGameOver;
 
     private float speedIncreaseTimer = 0f;
+    private PlayerController cachedPlayer;
+    private PowerUpSystem cachedPowerUpSystem;
 
     private void Awake()
     {
@@ -139,17 +141,15 @@ public class GameManager : MonoBehaviour
         speedIncreaseTimer = 0f;
         Time.timeScale = 1f;
         
-        PlayerController player = FindObjectOfType<PlayerController>();
-        if (player != null)
-        {
-            player.ResetPlayer();
-        }
+        if (cachedPlayer == null)
+            cachedPlayer = FindObjectOfType<PlayerController>();
+        if (cachedPlayer != null)
+            cachedPlayer.ResetPlayer();
         
-        PowerUpSystem powerUpSystem = FindObjectOfType<PowerUpSystem>();
-        if (powerUpSystem != null)
-        {
-            powerUpSystem.ResetPowerUps();
-        }
+        if (cachedPowerUpSystem == null)
+            cachedPowerUpSystem = FindObjectOfType<PowerUpSystem>();
+        if (cachedPowerUpSystem != null)
+            cachedPowerUpSystem.ResetPowerUps();
     }
 
     public void QuitGame()
