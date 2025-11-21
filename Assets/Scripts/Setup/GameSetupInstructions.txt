@@ -1,0 +1,187 @@
+==========================================
+2D ENDLESS RUNNER GAME - SETUP INSTRUCTIONS
+==========================================
+
+STEP 1: CREATE GAME MANAGER
+----------------------------
+1. Create an empty GameObject named "GameManager"
+2. Add the "GameManager" script component
+3. Configure in Inspector:
+   - Initial Speed: 5
+   - Max Speed: 20
+   - Speed Increase Rate: 0.1
+   - Speed Increase Interval: 1
+
+STEP 2: SETUP LOOPING GROUND
+-----------------------------
+1. Create an empty GameObject named "LoopingGround"
+2. Add the "LoopingGround" script component
+3. In Inspector:
+   - Ground 1: Drag your first ground GameObject (positioned at x=0, y=-5)
+   - Ground 2: Drag your second ground GameObject (positioned at x=64, y=-5)
+   - Ground Width: 64 (distance between ground positions)
+   - Left Boundary: -64 (X position where ground teleports)
+   - Right Boundary: 64 (X position where ground teleports to)
+
+STEP 3: SETUP PLAYER
+--------------------
+1. Select your Player GameObject
+2. Add the "PlayerController" script component
+3. Assign in Inspector:
+   - Jump Force: 15
+   - Max Jump Height: -3
+   - Ground Y Position: -12.59
+   - RB: Drag Rigidbody2D component
+   - Animator: Drag Animator component
+   - Player Collider: Drag BoxCollider2D component
+4. Make sure Player has tag "Player" set in Inspector
+
+STEP 4: SETUP OBJECT POOLER
+----------------------------
+1. Create an empty GameObject named "ObjectPooler"
+2. Add the "ObjectPooler" script component
+3. In Inspector, set up Pools array:
+   - Size: 3 (or more if needed)
+   - Pool 1:
+     * Tag: "Obstacle"
+     * Prefab: Drag your spike obstacle prefab
+     * Size: 10
+   - Pool 2:
+     * Tag: "Coin"
+     * Prefab: Drag your coin prefab
+     * Size: 20
+   - Pool 3:
+     * Tag: "Shield"
+     * Prefab: Drag your shield power-up prefab
+     * Size: 5
+   - Pool 4:
+     * Tag: "DoubleJump"
+     * Prefab: Drag your double jump power-up prefab
+     * Size: 5
+
+STEP 5: SETUP OBJECT SPAWNER
+-----------------------------
+1. Create an empty GameObject named "ObjectSpawner"
+2. Position it at (0, 0, 0) or follow camera
+3. Add the "ObjectSpawner" script component
+4. Configure in Inspector:
+   - Spawn Distance: 20
+   - Min Spawn Interval: 2
+   - Max Spawn Interval: 4
+   - Safe Zone Width: 5
+   - Ground Y Position: -12.59
+   - Spawn Lanes: Array of X positions (e.g., -13, -8, -3)
+   - Obstacle Prefab: Drag spike prefab
+   - Coin Prefab: Drag coin prefab
+   - Shield Power Up Prefab: Drag shield prefab
+   - Double Jump Power Up Prefab: Drag double jump prefab
+   - Obstacle Y Position: -12.59 (ground level)
+   - Booster Y Position: -3 (air level for power-ups)
+   - Min Coin Y Position: -12.59
+   - Max Coin Y Position: -3
+   - Max Coins In Row: 6
+   - Coin Spacing: 2 (horizontal spacing between coins in a row)
+   - Spawn Probabilities: 
+     * Obstacle Spawn Chance: 0.4 (frequent)
+     * Coin Spawn Chance: 0.5 (frequent)
+     * Power Up Spawn Chance: 0.1 (rare)
+     * Coin Row Spawn Chance: 0.3 (chance to spawn row vs single coin)
+
+STEP 6: SETUP POWER-UP PREFABS
+-------------------------------
+For Shield Power-Up Prefab:
+1. Add "ShieldPowerUp" script component
+2. Set Power Up Type: Shield
+3. Set Duration: 10 (configurable)
+4. Make sure it has Collider2D with Is Trigger = true
+5. Set tag to "PowerUp"
+
+For Double Jump Power-Up Prefab:
+1. Add "DoubleJumpPowerUp" script component
+2. Set Power Up Type: DoubleJump
+3. Set Duration: 10 (configurable)
+4. Make sure it has Collider2D with Is Trigger = true
+5. Set tag to "PowerUp"
+
+STEP 7: SETUP POWER-UP SYSTEM
+------------------------------
+1. Create an empty GameObject named "PowerUpSystem"
+2. Add the "PowerUpSystem" script component
+3. No additional configuration needed (power-ups are handled via events)
+
+STEP 8: SETUP AUDIO MANAGER
+----------------------------
+1. Create an empty GameObject named "AudioManager"
+2. Add the "AudioManager" script component
+3. In Inspector:
+   - BGM Source: Create empty child "BGM" with AudioSource (Loop = true, Play On Awake = true)
+   - SFX Source: Create empty child "SFX" with AudioSource
+   - Menu BGM: Assign your menu background music clip
+   - Game BGM: Assign your game background music clip
+   - SFX Clips: Add entries for:
+     * Name: "Coin", Clip: coin collect sound
+     * Name: "PowerUp", Clip: power-up collect sound
+     * Name: "Death", Clip: death sound
+     * Name: "GameOver", Clip: game over sound
+
+STEP 9: SETUP PREFABS
+---------------------
+For Obstacle (Spike) Prefab:
+1. Add "MovingObject" script component
+2. Set Despawn Distance: -30
+3. Set Should Move: true
+4. Set tag to "Obstacle"
+5. Make sure BoxCollider2D has Is Trigger = true
+
+For Coin Prefab:
+1. Add "MovingObject" script component
+2. Set Despawn Distance: -30
+3. Set Should Move: true
+4. Set tag to "Coin"
+5. Make sure CircleCollider2D has Is Trigger = true
+
+STEP 10: SETUP UI MANAGER
+--------------------------
+1. Select your Canvas GameObject
+2. Add the "UIManager" script component
+3. In Inspector, assign all UI elements:
+   - Panels: Drag all panel GameObjects
+   - Buttons: Drag all button components
+   - Sliders: Drag music and SFX volume sliders
+   - Text Elements: Drag all TextMeshProUGUI components
+
+STEP 11: SETUP TAGS
+-------------------
+Go to Edit > Project Settings > Tags and Layers
+Add these tags if they don't exist:
+- Player
+- Obstacle
+- Coin
+- PowerUp
+
+STEP 12: ANIMATOR SETUP
+------------------------
+Make sure your Animator Controller has:
+- "Run" bool parameter
+- "Death" trigger parameter
+- Transition from Idle to Run (when Run = true)
+- Transition from Any State to Death (when Death trigger is set)
+
+STEP 13: TESTING
+----------------
+1. Press Play
+2. Click Start button - game should begin, player should run
+3. Test jump button (right half of screen)
+4. Test pause button
+5. Test settings volume sliders
+6. Collect coins and power-ups
+7. Hit obstacles to test game over
+
+TROUBLESHOOTING:
+- If objects don't spawn: Check ObjectPooler and ObjectSpawner are set up correctly
+- If player doesn't jump: Check jump button is assigned and PlayerController has correct jump force
+- If game doesn't pause: Check GameManager and UIManager are connected
+- If audio doesn't play: Check AudioManager has clips assigned and AudioSources are set up
+- If ground doesn't loop: Check LoopingGround has both ground objects assigned and correct boundaries set
+
+
